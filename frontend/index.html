@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinOps Multi-Cloud Cost Dashboard</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="logo-icon">🚀</span>
+                <h2>FinOps Hub</h2>
+            </div>
+            <nav class="menu">
+                <a href="#" class="menu-item active">
+                    <span class="menu-icon">📊</span> Dashboard
+                </a>
+                <a href="#recommendations" class="menu-item">
+                    <span class="menu-icon">💡</span> Optimization
+                </a>
+                <a href="http://127.0.0.1:8000/docs" target="_blank" class="menu-item">
+                    <span class="menu-icon">⚙️</span> API Docs
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <p>Status: <span class="status-badge online">Active</span></p>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard View -->
+        <main class="main-content">
+            <!-- Header Panel -->
+            <header class="header">
+                <div class="welcome">
+                    <h1>Multi-Cloud Dashboard</h1>
+                    <p class="subtitle">Real-time cost aggregation & idle resource optimization analytics.</p>
+                </div>
+                <div class="meta-controls">
+                    <div class="sync-pill">
+                        <span class="pulse-dot"></span>
+                        <span class="pill-text">GCP BigQuery Connected</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- KPI Row (Summary Cards) -->
+            <section class="kpi-grid">
+                <!-- KPI 1: Combined Spend -->
+                <div class="card kpi-card">
+                    <div class="kpi-icon combined-bg">🌐</div>
+                    <div class="kpi-info">
+                        <h3>Combined Spend (90d)</h3>
+                        <p class="kpi-value" id="kpi-combined-spend">$0.00</p>
+                    </div>
+                </div>
+
+                <!-- KPI 2: AWS Spend -->
+                <div class="card kpi-card">
+                    <div class="kpi-icon aws-bg">🧡</div>
+                    <div class="kpi-info">
+                        <h3>AWS Cost (90d)</h3>
+                        <p class="kpi-value" id="kpi-aws-spend">$0.00</p>
+                    </div>
+                </div>
+
+                <!-- KPI 3: GCP Spend -->
+                <div class="card kpi-card">
+                    <div class="kpi-icon gcp-bg">💙</div>
+                    <div class="kpi-info">
+                        <h3>GCP Cost (90d)</h3>
+                        <p class="kpi-value" id="kpi-gcp-spend">$0.00</p>
+                    </div>
+                </div>
+
+                <!-- KPI 4: Wasted Spend -->
+                <div class="card kpi-card highlight-wasted">
+                    <div class="kpi-icon wasted-bg">⚠️</div>
+                    <div class="kpi-info">
+                        <h3>Wasted Cost (Monthly)</h3>
+                        <p class="kpi-value warning-color" id="kpi-wasted-spend">$0.00</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts-grid">
+                <!-- Daily Cost Trends Line Chart -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h2>Daily Cost Trends (AWS vs GCP)</h2>
+                        <div class="lookback-filter">
+                            <select id="trends-lookback" onchange="loadCostTrends()">
+                                <option value="30" selected>Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="costTrendsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Service Breakdown Pie Chart -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h2>Service Spend Breakdown</h2>
+                        <div class="lookback-filter">
+                            <select id="breakdown-provider" onchange="loadServiceBreakdown()">
+                                <option value="" selected>Combined</option>
+                                <option value="AWS">AWS Only</option>
+                                <option value="GCP">GCP Only</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="serviceBreakdownChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recommendations / Optimization Section -->
+            <section class="recommendations-section" id="recommendations">
+                <div class="card table-card">
+                    <div class="card-header">
+                        <div class="table-title">
+                            <h2>Idle Resource Recommendations</h2>
+                            <p class="table-subtitle">GCP VM instances with CPU &lt; 5% utilization over the lookback window.</p>
+                        </div>
+                        <div class="alert-kpi">
+                            Active Alerts: <span class="badge warning-badge" id="active-alerts-count">0</span>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="alert-table">
+                            <thead>
+                                <tr>
+                                    <th>Resource Name</th>
+                                    <th>Cloud</th>
+                                    <th>Location</th>
+                                    <th>Avg CPU</th>
+                                    <th>Monthly Cost</th>
+                                    <th>Est. Wasted</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alerts-table-body">
+                                <tr>
+                                    <td colspan="7" class="loading-row">Scanning Cloud Monitoring for idle resources...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Frontend logic script -->
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

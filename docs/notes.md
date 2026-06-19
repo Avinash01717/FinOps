@@ -35,3 +35,8 @@ This document contains brief summaries of each component in the FinOps Dashboard
 ## 8. FastAPI API Layer & Routers
 - **What it does**: Exposes summary KPIs, daily cost trends (AWS vs. GCP), service spending breakdowns, and VM idle optimization alerts through RESTful API endpoints. Configures Cross-Origin Resource Sharing (CORS) middleware to allow browser calls from local hosts.
 - **Engineering Rationale**: The API layer serves as a decoupled bridge between the MySQL storage and the presentation frontend. Utilizing Pydantic schemas enforces strict type safety and request/response validation, while the CORS configuration is necessary to prevent local development origins (like a frontend running on port 5500 or double-clicked `index.html`) from being blocked by browser security policies.
+
+## 9. Premium Frontend Web Dashboard
+- **What it does**: A fully responsive dark-mode portal displaying combined spend, AWS vs. GCP daily cost trends using a Chart.js Line chart, service distribution using a Doughnut chart, and active idle VM optimization recommendations.
+- **Engineering Rationale**: Designed with Outfit typography and CSS glassmorphism, the interface provides a premium, production-ready aesthetic for portfolio reviews. Integrating a reactive update pattern (clicking "Dismiss" sends a PUT request to update the MySQL alert state, triggers a smooth CSS row translation slide out, and immediately re-queries high-level KPI cards to update metrics without reloading the page) delivers a highly responsive user experience.
+
