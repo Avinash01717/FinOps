@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinOps Multi-Cloud Cost Dashboard</title>
+    <title>GCP FinOps Cost & Optimization Dashboard</title>
     
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,8 +21,8 @@
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="brand">
-                <span class="logo-icon">🚀</span>
-                <h2>FinOps Hub</h2>
+                <span class="logo-icon">☁️</span>
+                <h2>GCP FinOps</h2>
             </div>
             <nav class="menu">
                 <a href="#" class="menu-item active">
@@ -45,43 +45,43 @@
             <!-- Header Panel -->
             <header class="header">
                 <div class="welcome">
-                    <h1>Multi-Cloud Dashboard</h1>
-                    <p class="subtitle">Real-time cost aggregation & idle resource optimization analytics.</p>
+                    <h1>GCP Cost &amp; Optimization</h1>
+                    <p class="subtitle">Real-time cost aggregation & VM resource right-sizing analysis.</p>
                 </div>
                 <div class="meta-controls">
                     <div class="sync-pill">
                         <span class="pulse-dot"></span>
-                        <span class="pill-text">GCP BigQuery Connected</span>
+                        <span class="pill-text">GCP Monitoring &amp; BigQuery Active</span>
                     </div>
                 </div>
             </header>
 
             <!-- KPI Row (Summary Cards) -->
             <section class="kpi-grid">
-                <!-- KPI 1: Combined Spend -->
+                <!-- KPI 1: GCP Spend 90d -->
                 <div class="card kpi-card">
-                    <div class="kpi-icon combined-bg">🌐</div>
+                    <div class="kpi-icon gcp-bg">🌐</div>
                     <div class="kpi-info">
-                        <h3>Combined Spend (90d)</h3>
-                        <p class="kpi-value" id="kpi-combined-spend">$0.00</p>
+                        <h3>GCP Spend (90d)</h3>
+                        <p class="kpi-value" id="kpi-gcp-90d">$0.00</p>
                     </div>
                 </div>
 
-                <!-- KPI 2: AWS Spend -->
+                <!-- KPI 2: GCP Spend 30d -->
                 <div class="card kpi-card">
-                    <div class="kpi-icon aws-bg">🧡</div>
+                    <div class="kpi-icon combined-bg">📅</div>
                     <div class="kpi-info">
-                        <h3>AWS Cost (90d)</h3>
-                        <p class="kpi-value" id="kpi-aws-spend">$0.00</p>
+                        <h3>GCP Spend (30d)</h3>
+                        <p class="kpi-value" id="kpi-gcp-30d">$0.00</p>
                     </div>
                 </div>
 
-                <!-- KPI 3: GCP Spend -->
+                <!-- KPI 3: Active Alerts -->
                 <div class="card kpi-card">
-                    <div class="kpi-icon gcp-bg">💙</div>
+                    <div class="kpi-icon aws-bg">🔔</div>
                     <div class="kpi-info">
-                        <h3>GCP Cost (90d)</h3>
-                        <p class="kpi-value" id="kpi-gcp-spend">$0.00</p>
+                        <h3>Active VM Alerts</h3>
+                        <p class="kpi-value" id="active-alerts-count">0</p>
                     </div>
                 </div>
 
@@ -100,7 +100,7 @@
                 <!-- Daily Cost Trends Line Chart -->
                 <div class="card chart-card">
                     <div class="card-header">
-                        <h2>Daily Cost Trends (AWS vs GCP)</h2>
+                        <h2>Daily GCP Spend Trends</h2>
                         <div class="lookback-filter">
                             <select id="trends-lookback" onchange="loadCostTrends()">
                                 <option value="30" selected>Last 30 Days</option>
@@ -116,12 +116,11 @@
                 <!-- Service Breakdown Pie Chart -->
                 <div class="card chart-card">
                     <div class="card-header">
-                        <h2>Service Spend Breakdown</h2>
+                        <h2>Service Cost Distribution</h2>
                         <div class="lookback-filter">
-                            <select id="breakdown-provider" onchange="loadServiceBreakdown()">
-                                <option value="" selected>Combined</option>
-                                <option value="AWS">AWS Only</option>
-                                <option value="GCP">GCP Only</option>
+                            <select id="breakdown-days" onchange="loadServiceBreakdown()">
+                                <option value="30" selected>Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
                             </select>
                         </div>
                     </div>
@@ -136,29 +135,26 @@
                 <div class="card table-card">
                     <div class="card-header">
                         <div class="table-title">
-                            <h2>Idle Resource Recommendations</h2>
-                            <p class="table-subtitle">GCP VM instances with CPU &lt; 5% utilization over the lookback window.</p>
-                        </div>
-                        <div class="alert-kpi">
-                            Active Alerts: <span class="badge warning-badge" id="active-alerts-count">0</span>
+                            <h2>VM Right-Sizing &amp; Idle Recommendations</h2>
+                            <p class="table-subtitle">Monitored instances analyzed for CPU &lt; 5% (Terminate) or CPU &lt; 15% (Downsize) optimization targets.</p>
                         </div>
                     </div>
                     <div class="table-wrapper">
                         <table class="alert-table">
                             <thead>
                                 <tr>
-                                    <th>Resource Name</th>
-                                    <th>Cloud</th>
-                                    <th>Location</th>
+                                    <th>Instance Name</th>
+                                    <th>Recommendation</th>
+                                    <th>Zone</th>
                                     <th>Avg CPU</th>
-                                    <th>Monthly Cost</th>
-                                    <th>Est. Wasted</th>
+                                    <th>Current Cost</th>
+                                    <th>Est. Wasted (Savings)</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="alerts-table-body">
                                 <tr>
-                                    <td colspan="7" class="loading-row">Scanning Cloud Monitoring for idle resources...</td>
+                                    <td colspan="7" class="loading-row">Scanning Cloud Monitoring for GCE metrics...</td>
                                 </tr>
                             </tbody>
                         </table>

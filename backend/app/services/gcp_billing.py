@@ -80,7 +80,9 @@ def _generate_mock_gcp_costs(start_date: date, end_date: date) -> list:
         {"name": "Compute Engine", "sku": "E2 Instance Core", "region": "asia-south1", "min_cost": 30.0, "max_cost": 45.0},
         {"name": "Cloud Storage", "sku": "Standard Storage", "region": "asia-south1", "min_cost": 2.0, "max_cost": 4.5},
         {"name": "BigQuery", "sku": "Analysis Queries", "region": "asia-south1", "min_cost": 1.0, "max_cost": 8.0},
-        {"name": "Cloud Run", "sku": "CPU Allocation", "region": "asia-south1", "min_cost": 0.5, "max_cost": 2.0}
+        {"name": "Cloud Run", "sku": "CPU Allocation", "region": "asia-south1", "min_cost": 0.5, "max_cost": 2.0},
+        {"name": "Cloud SQL", "sku": "db-f1-micro Instance", "region": "asia-south1", "min_cost": 8.0, "max_cost": 15.0},
+        {"name": "Pub/Sub", "sku": "Message Ingestion", "region": "asia-south1", "min_cost": 0.1, "max_cost": 1.5}
     ]
 
     records = []

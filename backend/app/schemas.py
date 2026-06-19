@@ -4,7 +4,7 @@ from typing import Optional, List
 
 # Cost Schemas
 class DailyCostBase(BaseModel):
-    provider: str
+    provider: str = "GCP"
     service: str
     sku: Optional[str] = None
     region: str
@@ -25,8 +25,8 @@ class DailyCostResponse(DailyCostBase):
 class IdleResourceAlertBase(BaseModel):
     resource_id: str
     resource_name: str
-    resource_type: str = "Virtual Machine"
-    provider: str
+    resource_type: str = "VM (Terminate)"  # VM (Terminate) or VM (Downsize)
+    provider: str = "GCP"
     region: str
     average_cpu: float
     monthly_cost: float
@@ -44,9 +44,9 @@ class IdleResourceAlertResponse(IdleResourceAlertBase):
     class Config:
         from_attributes = True
 
-# Dashboard Summary Schema
+# Dashboard Summary Schema - GCP Dedicated
 class DashboardSummaryResponse(BaseModel):
     total_wasted_monthly: float
     active_alerts_count: int
-    aws_total_cost_90d: float
     gcp_total_cost_90d: float
+    gcp_total_cost_30d: float
