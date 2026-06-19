@@ -31,8 +31,11 @@
                 <a href="#resources" class="menu-item">
                     <span class="menu-icon">🖥️</span> GCE Instances
                 </a>
-                <a href="http://127.0.0.1:8000/docs" target="_blank" class="menu-item">
-                    <span class="menu-icon">⚙️</span> API Docs
+                <a href="#vpcs" class="menu-item">
+                    <span class="menu-icon">🌐</span> VPC Networks
+                </a>
+                <a href="#iam" class="menu-item">
+                    <span class="menu-icon">🔑</span> IAM &amp; Admin
                 </a>
             </nav>
             <div class="sidebar-footer">
@@ -48,7 +51,15 @@
                     <h1>GCP Real-Time Live Monitor</h1>
                     <p class="subtitle">Live resource inventory, burning rates, and CPU utilization tracking.</p>
                 </div>
-                <div class="meta-controls">
+                <div class="meta-controls" style="display: flex; gap: 0.75rem; align-items: center;">
+                    <span style="font-size:0.85rem; color:var(--text-secondary);">📅 Global Period:</span>
+                    <select id="global-period" class="period-select" onchange="onGlobalPeriodChange(this.value)">
+                        <option value="live">⚡ Live</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="1week">1 Week</option>
+                        <option value="10days">10 Days</option>
+                        <option value="1month">1 Month</option>
+                    </select>
                     <button class="sync-btn" onclick="refreshDashboard()">
                         <span class="sync-icon">🔄</span> Force Refresh
                     </button>
@@ -57,11 +68,23 @@
 
             <!-- KPI Row (Summary Cards) -->
             <section class="kpi-grid">
+                <!-- Period selector row above KPIs -->
+                <div class="period-bar" style="grid-column: 1 / -1; display:flex; align-items:center; justify-content:flex-end; gap:0.5rem; margin-bottom:0.25rem;">
+                    <span style="font-size:0.78rem; color:var(--text-muted);">📅 Period:</span>
+                    <select id="kpi-period" class="period-select" onchange="onKpiPeriodChange(this.value)">
+                        <option value="live">⚡ Live</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="1week">1 Week</option>
+                        <option value="10days">10 Days</option>
+                        <option value="1month">1 Month</option>
+                    </select>
+                </div>
+
                 <!-- KPI 1: GCP Hourly Burn -->
                 <div class="card kpi-card">
                     <div class="kpi-icon combined-bg">⚡</div>
                     <div class="kpi-info">
-                        <h3>Hourly Burn Rate</h3>
+                        <h3 id="kpi-hourly-label">Hourly Burn Rate</h3>
                         <p class="kpi-value" id="kpi-hourly-burn">$0.00</p>
                     </div>
                 </div>
@@ -70,7 +93,7 @@
                 <div class="card kpi-card">
                     <div class="kpi-icon gcp-bg">🌐</div>
                     <div class="kpi-info">
-                        <h3>Daily Burn Rate</h3>
+                        <h3 id="kpi-daily-label">Daily Burn Rate</h3>
                         <p class="kpi-value" id="kpi-daily-burn">$0.00</p>
                     </div>
                 </div>
@@ -88,7 +111,7 @@
                 <div class="card kpi-card highlight-wasted">
                     <div class="kpi-icon wasted-bg">⚠️</div>
                     <div class="kpi-info">
-                        <h3>Est. Wasted (Monthly)</h3>
+                        <h3 id="kpi-wasted-label">Est. Wasted (Monthly)</h3>
                         <p class="kpi-value warning-color" id="kpi-wasted-spend">$0.00</p>
                     </div>
                 </div>
@@ -99,10 +122,19 @@
                 <!-- Live VM CPU line chart -->
                 <div class="card chart-card">
                     <div class="card-header">
-                        <h2>Live VM CPU History (Last 2 Hours)</h2>
-                        <div class="sync-pill">
-                            <span class="pulse-dot"></span>
-                            <span class="pill-text" id="live-cpu-val">0.0% CPU</span>
+                        <h2 id="cpu-chart-title">Live VM CPU History (Last 2 Hours)</h2>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <div class="sync-pill">
+                                <span class="pulse-dot"></span>
+                                <span class="pill-text" id="live-cpu-val">0.0% CPU</span>
+                            </div>
+                            <select id="cpu-period" class="period-select" onchange="onCpuPeriodChange(this.value)">
+                                <option value="live">⚡ Live</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="1week">1 Week</option>
+                                <option value="10days">10 Days</option>
+                                <option value="1month">1 Month</option>
+                            </select>
                         </div>
                     </div>
                     <div class="chart-container">
@@ -113,7 +145,14 @@
                 <!-- Cost Breakdown doughnut chart -->
                 <div class="card chart-card">
                     <div class="card-header">
-                        <h2>Daily Cost Distribution</h2>
+                        <h2 id="breakdown-chart-title">Daily Cost Distribution</h2>
+                        <select id="breakdown-period" class="period-select" onchange="onBreakdownPeriodChange(this.value)">
+                            <option value="live">⚡ Live</option>
+                            <option value="yesterday">Yesterday</option>
+                            <option value="1week">1 Week</option>
+                            <option value="10days">10 Days</option>
+                            <option value="1month">1 Month</option>
+                        </select>
                     </div>
                     <div class="chart-container">
                         <canvas id="serviceBreakdownChart"></canvas>
@@ -124,12 +163,25 @@
             <!-- Recommendations / Optimization Section -->
             <section class="recommendations-section" id="resources">
                 <div class="card table-card">
-                    <div class="card-header">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                         <div class="table-title">
                             <h2>Compute Engine VM Inventory &amp; Optimization</h2>
-                            <p class="table-subtitle">Live status and right-sizing analysis of GCE instances in zone <code style="color: var(--accent-blue);">asia-south1-a</code>.</p>
+                            <p class="table-subtitle">Live status, control actions, and right-sizing analysis of GCE instances.</p>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <select id="vm-period" class="period-select" onchange="onVmPeriodChange(this.value)">
+                                <option value="live">⚡ Live</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="1week">1 Week</option>
+                                <option value="10days">10 Days</option>
+                                <option value="1month">1 Month</option>
+                            </select>
+                            <a href="https://console.cloud.google.com/compute/instances?authuser=1&project=finops-dashboard-prod&onCreate=true" target="_blank" class="sync-btn btn-vm" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                                + Provision VM
+                            </a>
                         </div>
                     </div>
+
                     <div class="table-wrapper">
                         <table class="alert-table">
                             <thead>
@@ -139,7 +191,7 @@
                                     <th>Zone</th>
                                     <th>Status</th>
                                     <th>Live CPU</th>
-                                    <th>Daily Cost</th>
+                                    <th id="vm-cost-col-header">Daily Cost</th>
                                     <th>Recommendation</th>
                                     <th>Action</th>
                                 </tr>
@@ -147,6 +199,136 @@
                             <tbody id="alerts-table-body">
                                 <tr>
                                     <td colspan="8" class="loading-row">Polling live GCE instances...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VPC Networks Section -->
+            <section class="recommendations-section" id="vpcs">
+                <div class="card table-card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div class="table-title">
+                            <h2>VPC Networks</h2>
+                            <p class="table-subtitle">Virtual Private Cloud networks and subnets configured in the project.</p>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <select id="vpc-period" class="period-select" onchange="onVpcPeriodChange(this.value)">
+                                <option value="live">⚡ Live</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="1week">1 Week</option>
+                                <option value="10days">10 Days</option>
+                                <option value="1month">1 Month</option>
+                            </select>
+                        </div>
+                        <a href="https://console.cloud.google.com/networking/networks/add?authuser=1&project=finops-dashboard-prod" target="_blank" class="sync-btn btn-vpc" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                            + Create VPC
+                        </a>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <table class="alert-table">
+                            <thead>
+                                <tr>
+                                    <th>VPC Network Name</th>
+                                    <th>Network ID</th>
+                                    <th>Routing Mode</th>
+                                    <th>Auto Subnets</th>
+                                    <th>Subnets</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vpcs-table-body">
+                                <tr>
+                                    <td colspan="6" class="loading-row">Polling VPC networks...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- IAM Service Accounts Section -->
+            <section class="recommendations-section" id="iam">
+                <div class="card table-card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div class="table-title">
+                            <h2>IAM &amp; Service Accounts</h2>
+                            <p class="table-subtitle">Service account identities for resource delegation and application access.</p>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <select id="iam-period" class="period-select" onchange="onIamPeriodChange(this.value)">
+                                <option value="live">⚡ Live</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="1week">1 Week</option>
+                                <option value="10days">10 Days</option>
+                                <option value="1month">1 Month</option>
+                            </select>
+                            <a href="https://console.cloud.google.com/iam-admin/serviceaccounts/create?authuser=1&project=finops-dashboard-prod" target="_blank" class="sync-btn btn-iam" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                                + Create Service Account
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <table class="alert-table">
+                            <thead>
+                                <tr>
+                                    <th>Display Name</th>
+                                    <th>Service Account Email</th>
+                                    <th>Unique ID</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="iam-table-body">
+                                <tr>
+                                    <td colspan="5" class="loading-row">Polling service accounts...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cloud Storage Buckets Section -->
+            <section class="recommendations-section" id="buckets">
+                <div class="card table-card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div class="table-title">
+                            <h2>Cloud Storage Buckets</h2>
+                            <p class="table-subtitle">Google Cloud Storage buckets configured in the project.</p>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <select id="bucket-period" class="period-select" onchange="onBucketPeriodChange(this.value)">
+                                <option value="live">⚡ Live</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="1week">1 Week</option>
+                                <option value="10days">10 Days</option>
+                                <option value="1month">1 Month</option>
+                            </select>
+                            <a href="https://console.cloud.google.com/storage/browser/add-bucket?authuser=1&project=finops-dashboard-prod" target="_blank" class="sync-btn btn-bucket" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                                + Create Bucket
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="alert-table">
+                            <thead>
+                                <tr>
+                                    <th>Bucket Name</th>
+                                    <th>Location</th>
+                                    <th>Storage Class</th>
+                                    <th>Created At</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="buckets-table-body">
+                                <tr>
+                                    <td colspan="5" class="loading-row">Polling storage buckets...</td>
                                 </tr>
                             </tbody>
                         </table>
