@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GCP FinOps Cost & Optimization Dashboard</title>
+    <title>GCP Real-Time Live Resource Monitor</title>
     
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,21 +22,21 @@
         <aside class="sidebar">
             <div class="brand">
                 <span class="logo-icon">☁️</span>
-                <h2>GCP FinOps</h2>
+                <h2>GCP Monitor</h2>
             </div>
             <nav class="menu">
                 <a href="#" class="menu-item active">
-                    <span class="menu-icon">📊</span> Dashboard
+                    <span class="menu-icon">📊</span> Live Monitor
                 </a>
-                <a href="#recommendations" class="menu-item">
-                    <span class="menu-icon">💡</span> Optimization
+                <a href="#resources" class="menu-item">
+                    <span class="menu-icon">🖥️</span> GCE Instances
                 </a>
                 <a href="http://127.0.0.1:8000/docs" target="_blank" class="menu-item">
                     <span class="menu-icon">⚙️</span> API Docs
                 </a>
             </nav>
             <div class="sidebar-footer">
-                <p>Status: <span class="status-badge online">Active</span></p>
+                <p>Status: <span class="status-badge online">Live Connection</span></p>
             </div>
         </aside>
 
@@ -45,51 +45,50 @@
             <!-- Header Panel -->
             <header class="header">
                 <div class="welcome">
-                    <h1>GCP Cost &amp; Optimization</h1>
-                    <p class="subtitle">Real-time cost aggregation & VM resource right-sizing analysis.</p>
+                    <h1>GCP Real-Time Live Monitor</h1>
+                    <p class="subtitle">Live resource inventory, burning rates, and CPU utilization tracking.</p>
                 </div>
                 <div class="meta-controls">
-                    <div class="sync-pill">
-                        <span class="pulse-dot"></span>
-                        <span class="pill-text">GCP Monitoring &amp; BigQuery Active</span>
-                    </div>
+                    <button class="sync-btn" onclick="refreshDashboard()">
+                        <span class="sync-icon">🔄</span> Force Refresh
+                    </button>
                 </div>
             </header>
 
             <!-- KPI Row (Summary Cards) -->
             <section class="kpi-grid">
-                <!-- KPI 1: GCP Spend 90d -->
+                <!-- KPI 1: GCP Hourly Burn -->
+                <div class="card kpi-card">
+                    <div class="kpi-icon combined-bg">⚡</div>
+                    <div class="kpi-info">
+                        <h3>Hourly Burn Rate</h3>
+                        <p class="kpi-value" id="kpi-hourly-burn">$0.00</p>
+                    </div>
+                </div>
+
+                <!-- KPI 2: GCP Daily Burn -->
                 <div class="card kpi-card">
                     <div class="kpi-icon gcp-bg">🌐</div>
                     <div class="kpi-info">
-                        <h3>GCP Spend (90d)</h3>
-                        <p class="kpi-value" id="kpi-gcp-90d">$0.00</p>
+                        <h3>Daily Burn Rate</h3>
+                        <p class="kpi-value" id="kpi-daily-burn">$0.00</p>
                     </div>
                 </div>
 
-                <!-- KPI 2: GCP Spend 30d -->
-                <div class="card kpi-card">
-                    <div class="kpi-icon combined-bg">📅</div>
-                    <div class="kpi-info">
-                        <h3>GCP Spend (30d)</h3>
-                        <p class="kpi-value" id="kpi-gcp-30d">$0.00</p>
-                    </div>
-                </div>
-
-                <!-- KPI 3: Active Alerts -->
+                <!-- KPI 3: Active Recommendations Alerts -->
                 <div class="card kpi-card">
                     <div class="kpi-icon aws-bg">🔔</div>
                     <div class="kpi-info">
-                        <h3>Active VM Alerts</h3>
+                        <h3>Optimization Alerts</h3>
                         <p class="kpi-value" id="active-alerts-count">0</p>
                     </div>
                 </div>
 
-                <!-- KPI 4: Wasted Spend -->
+                <!-- KPI 4: Monthly Wasted Spend -->
                 <div class="card kpi-card highlight-wasted">
                     <div class="kpi-icon wasted-bg">⚠️</div>
                     <div class="kpi-info">
-                        <h3>Wasted Cost (Monthly)</h3>
+                        <h3>Est. Wasted (Monthly)</h3>
                         <p class="kpi-value warning-color" id="kpi-wasted-spend">$0.00</p>
                     </div>
                 </div>
@@ -97,15 +96,13 @@
 
             <!-- Charts Section -->
             <section class="charts-grid">
-                <!-- Daily Cost Trends Line Chart -->
+                <!-- Live VM CPU line chart -->
                 <div class="card chart-card">
                     <div class="card-header">
-                        <h2>Daily GCP Spend Trends</h2>
-                        <div class="lookback-filter">
-                            <select id="trends-lookback" onchange="loadCostTrends()">
-                                <option value="30" selected>Last 30 Days</option>
-                                <option value="90">Last 90 Days</option>
-                            </select>
+                        <h2>Live VM CPU History (Last 2 Hours)</h2>
+                        <div class="sync-pill">
+                            <span class="pulse-dot"></span>
+                            <span class="pill-text" id="live-cpu-val">0.0% CPU</span>
                         </div>
                     </div>
                     <div class="chart-container">
@@ -113,16 +110,10 @@
                     </div>
                 </div>
 
-                <!-- Service Breakdown Pie Chart -->
+                <!-- Cost Breakdown doughnut chart -->
                 <div class="card chart-card">
                     <div class="card-header">
-                        <h2>Service Cost Distribution</h2>
-                        <div class="lookback-filter">
-                            <select id="breakdown-days" onchange="loadServiceBreakdown()">
-                                <option value="30" selected>Last 30 Days</option>
-                                <option value="90">Last 90 Days</option>
-                            </select>
-                        </div>
+                        <h2>Daily Cost Distribution</h2>
                     </div>
                     <div class="chart-container">
                         <canvas id="serviceBreakdownChart"></canvas>
@@ -131,12 +122,12 @@
             </section>
 
             <!-- Recommendations / Optimization Section -->
-            <section class="recommendations-section" id="recommendations">
+            <section class="recommendations-section" id="resources">
                 <div class="card table-card">
                     <div class="card-header">
                         <div class="table-title">
-                            <h2>VM Right-Sizing &amp; Idle Recommendations</h2>
-                            <p class="table-subtitle">Monitored instances analyzed for CPU &lt; 5% (Terminate) or CPU &lt; 15% (Downsize) optimization targets.</p>
+                            <h2>Compute Engine VM Inventory &amp; Optimization</h2>
+                            <p class="table-subtitle">Live status and right-sizing analysis of GCE instances in zone <code style="color: var(--accent-blue);">asia-south1-a</code>.</p>
                         </div>
                     </div>
                     <div class="table-wrapper">
@@ -144,17 +135,18 @@
                             <thead>
                                 <tr>
                                     <th>Instance Name</th>
-                                    <th>Recommendation</th>
+                                    <th>Machine Type</th>
                                     <th>Zone</th>
-                                    <th>Avg CPU</th>
-                                    <th>Current Cost</th>
-                                    <th>Est. Wasted (Savings)</th>
+                                    <th>Status</th>
+                                    <th>Live CPU</th>
+                                    <th>Daily Cost</th>
+                                    <th>Recommendation</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="alerts-table-body">
                                 <tr>
-                                    <td colspan="7" class="loading-row">Scanning Cloud Monitoring for GCE metrics...</td>
+                                    <td colspan="8" class="loading-row">Polling live GCE instances...</td>
                                 </tr>
                             </tbody>
                         </table>

@@ -411,3 +411,36 @@ body {
     border-color: var(--accent-red);
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
 }
+
+/* Force Sync Button styles */
+.sync-btn {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--accent-blue);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all var(--transition-speed) ease;
+}
+
+.sync-btn:hover {
+    background-color: var(--accent-blue);
+    color: #fff;
+    border-color: var(--accent-blue);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.sync-icon {
+    display: inline-block;
+    transition: transform 0.5s ease;
+}
+
+.sync-btn:hover .sync-icon {
+    transform: rotate(180deg);
+}
