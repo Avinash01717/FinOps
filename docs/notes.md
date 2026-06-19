@@ -19,3 +19,15 @@ This document contains brief summaries of each component in the FinOps Dashboard
 ## 4. Synthetic Data Generation Engine
 - **What it does**: Generates 90 days of daily cost records across AWS and GCP services with realistic spend patterns and random fluctuations, along with active idle GCE VM alerts.
 - **Engineering Rationale**: Provides immediate, realistic trend data for local testing and visualization. Spikes in BigQuery costs and weekend backup increases for S3/RDS mimic real enterprise environments, making dashboard demonstrations highly compelling in interviews without generating any cloud provider costs.
+
+## 5. Multi-Cloud Billing Integration Services
+- **What it does**: Implemented `aws_billing.py` to mock the AWS Cost Explorer API structure, and `gcp_billing.py` to run real SQL aggregation queries on GCP's BigQuery billing dataset.
+- **Engineering Rationale**: Using a mockup for AWS is a cost-control guardrail (avoiding the $0.01/call AWS charge). The GCP billing integration uses a production fallback pattern: if the BigQuery tables haven't been exported yet (which has a 24h delay), it falls back to a synthetic generator automatically. This ensures high availability and a seamless developer setup experience.
+
+## 6. GCP Cloud Monitoring Idle VM Detector
+- **What it does**: Queries the real GCP Cloud Monitoring API for GCE CPU utilization metrics (`cpu/utilization`) over a 7-day lookback window, flagging any instance with an average CPU under 5% as idle in MySQL.
+- **Engineering Rationale**: Out-of-the-box system metrics (like CPU) are free to query in GCP Monitoring. By extracting VM metadata directly from the metric time series labels, we avoid having to call additional compute APIs, streamlining the credential scopes.
+
+## 7. Automated Cost Ingestion Pipeline
+- **What it does**: Orchestrates the daily pipeline through `fetch_daily_costs.py` by pulling cost datasets from AWS (mock) and GCP (BigQuery), resolving duplicate records via SQL upserts, and executing the VM idle resource scan.
+- **Engineering Rationale**: Combining cost aggregation and optimization detection into a single scheduled script mirrors enterprise cron setups (e.g. Airflow or Cloud Scheduler). Upsert logic (checking for existing rows before inserting) makes the pipeline idempotent, meaning it can be re-run safely for any date range without duplicating database rows.
