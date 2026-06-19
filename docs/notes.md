@@ -31,3 +31,7 @@ This document contains brief summaries of each component in the FinOps Dashboard
 ## 7. Automated Cost Ingestion Pipeline
 - **What it does**: Orchestrates the daily pipeline through `fetch_daily_costs.py` by pulling cost datasets from AWS (mock) and GCP (BigQuery), resolving duplicate records via SQL upserts, and executing the VM idle resource scan.
 - **Engineering Rationale**: Combining cost aggregation and optimization detection into a single scheduled script mirrors enterprise cron setups (e.g. Airflow or Cloud Scheduler). Upsert logic (checking for existing rows before inserting) makes the pipeline idempotent, meaning it can be re-run safely for any date range without duplicating database rows.
+
+## 8. FastAPI API Layer & Routers
+- **What it does**: Exposes summary KPIs, daily cost trends (AWS vs. GCP), service spending breakdowns, and VM idle optimization alerts through RESTful API endpoints. Configures Cross-Origin Resource Sharing (CORS) middleware to allow browser calls from local hosts.
+- **Engineering Rationale**: The API layer serves as a decoupled bridge between the MySQL storage and the presentation frontend. Utilizing Pydantic schemas enforces strict type safety and request/response validation, while the CORS configuration is necessary to prevent local development origins (like a frontend running on port 5500 or double-clicked `index.html`) from being blocked by browser security policies.
