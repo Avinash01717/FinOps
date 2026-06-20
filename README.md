@@ -12,7 +12,7 @@ A multi-cloud (AWS + GCP) cost monitoring and idle-resource-detection tool. This
 ## Tech Stack
 - **Backend**: FastAPI, SQLAlchemy, MySQL
 - **Frontend**: Vanilla HTML/CSS/JS + Chart.js
-- **Cloud**: AWS (IAM Access Control Patterns), GCP (BigQuery billing export, Cloud Monitoring, Compute Engine, VPC/Firewalls)
+- **Cloud**: AWS (IAM Access Control Patterns), GCP (BigQuery billing export, Cloud Monitoring, Compute Engine, VPC/Firewalls), VM(VIrtual machines)
 
 ## Project Structure
 ```text
